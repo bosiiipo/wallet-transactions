@@ -25,5 +25,7 @@ Route::get('/run-seeder', function() {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
+
+    
     return 'Seeder executed!';
 });

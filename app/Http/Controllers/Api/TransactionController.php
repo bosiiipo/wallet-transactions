@@ -76,32 +76,39 @@ class TransactionController extends Controller
 
     public function index(Request $request)
     {
-        $query = Transaction::query();
+        $baseQuery = Transaction::query();
 
         // Filtering
-        if ($request->has('q')) {
-            $query->where('reference', 'like', "%{$request->q}%");
+        if ($request->filled('q')) {
+            $baseQuery->where('reference', 'like', "%{$request->q}%");
         }
 
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
+        if ($request->filled('type')) {
+            $baseQuery->where('type', $request->type);
         }
 
-        if ($request->has('from')) {
-            $query->whereDate('created_at', '>=', $request->from);
+        if ($request->filled('from')) {
+            $baseQuery->whereDate('created_at', '>=', $request->from);
         }
 
-        if ($request->has('to')) {
-            $query->whereDate('created_at', '<=', $request->to);
+        if ($request->filled('to')) {
+            $baseQuery->whereDate('created_at', '<=', $request->to);
         }
 
+        // Clone the query BEFORE paginate mutates it
+        $summaryQuery = clone $baseQuery;
+
+        // Pagination
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
 
-        $paginated = $query->orderBy('created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
+        $paginated = $baseQuery
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
 
-        $totalIn = $query->where('type', 'credit')->sum('amount');
-        $totalOut = $query->where('type', 'debit')->sum('amount');
+        // Now compute totals from the full (filtered) result
+        $totalIn = (clone $summaryQuery)->where('type', 'credit')->sum('amount');
+        $totalOut = (clone $summaryQuery)->where('type', 'debit')->sum('amount');
 
         return response()->json([
             'data' => $paginated->items(),
