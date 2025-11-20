@@ -7,9 +7,9 @@ Route::get('/', function () {
 });
 
 Route::get('/run-seeder', function() {
-    if (config('app.env') === 'production') {
-        abort(403, 'Forbidden');
-    }
+    // if (config('app.env') !== 'production') {
+    //     abort(403, 'Forbidden');
+    // }
 
     $userId = DB::table('users')->insertGetId([
         'name' => 'John Did',
