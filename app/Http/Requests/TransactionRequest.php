@@ -25,7 +25,7 @@ class TransactionRequest extends FormRequest
             'wallet_id' => ['required', 'exists:wallets,id'],
             'type' => ['required', 'in:credit,debit'],
             'amount' => ['required', 'numeric', 'gt:0'],
-            // 'reference' => ['required', 'string', 'unique:transactions,reference'],
+            'reference' => ['required', 'string', 'unique:transactions,reference'],
             'idempotency_key' => ['required', 'string', 'unique:idempotency_keys,key'],
         ];
     }
